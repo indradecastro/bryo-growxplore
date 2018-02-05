@@ -1,0 +1,8 @@
+import	raw	read.table	T
+unnamed-chunk-1	library	reshape	pures	raw	tipo	mixtas	c	which	sp	rep	%in%	grep	T	adults	cadults	as.matrix	table	eval	apply	sum	cpures	cmixtas
+unnamed-chunk-2	colfunc.ad	colorRampPalette	c	layout	matrix	par	padults	apply	cadults	x	sum	T	is.na	plotadults	barplot	F	nrow	adlabs	cbind	melt	cumsum	value	y	cum	as.vector	text	rep	table	Var.2	Var.1	pmixtas	cmixtas	plotmixtas	rownames	colfunc.pu	ppures	cpures	plotpure	axis	colnames	dicc	data.frame	library	plyr	arrange	merge	meaning
+unnamed-chunk-3	colfunc.ad	colorRampPalette	c	layout	matrix	par	padults	apply	cadults	x	sum	T	is.na	plotadults	barplot	F	nrow	adlabs	cbind	melt	cumsum	value	y	cum	as.vector	text	rep	table	Var.2	Var.1	pmixtas	cmixtas	rownames	plotmixtas	colfunc.pu	ppures	cpures	plotpure	axis
+unnamed-chunk-4	library	DT	datatable	data.frame	rbind	addmargins	cadults	T
+unnamed-chunk-5	datatable	data.frame	rbind	addmargins	cmixtas	T
+unnamed-chunk-6	dfpures	data.frame	rbind	addmargins	cpures	colnames	c	datatable	T
+unnamed-chunk-7	colfunc.pu	colorRampPalette	c	ppures	apply	cpures	x	sum	T	is.na	plotpure	barplot	F	nrow	rownames	list	axis	adlabs	cbind	melt	cumsum	value	y	cum	as.vector	text	rep	table	Var.2	Var.1

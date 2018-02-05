@@ -1,0 +1,186 @@
+---
+title: "Explore Bryophyte growth and damage"
+author: "indra deCastro"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    theme: united
+---
+      
+<style type="text/css">
+      .table {
+            width: 100%;
+      }
+</style>
+      
+```{r setup, include=FALSE}
+# setwd("/home/indra/Documents/20160101.Noriega.exp.remocion/")
+knitr::opts_knit$set(root.dir ="/home/indra/Documents/20170901.Musgos/bryo-growxplore/", message=F, warning=F, verbose=F, comment=F)
+knitr::opts_chunk$set(message=F, warning=F, verbose=F, echo=F, autodep=T, cache=T, fig.width=10)
+options(markdown.HTML.header = system.file("misc", "datatables.html", package = "knitr"))
+```
+
+## Import data
+```{r import, echo=T}
+raw <- read.table("20180124.eval.cualitativa.csv", header=T, na.strings="", sep="\t")
+```
+
+Location    |Data type                 | Date        | Researchers
+------------|---------------------------|-------------|--------------------
+Ventorrillo |qualitative, photos [RGB](https://www.dropbox.com/sh/mh1bx8ohuri4see/AACzO2pp60-_cA07VB8UjVGsa?dl=0)+[IR](https://www.dropbox.com/sh/583j9i2kp3kjsiw/AABzcOK8EKxV0elKUfhXjkgea?dl=0) | 23 jan 2018 | Fernando, Indra
+UAM         |qualitative, photos [RGB](https://www.dropbox.com/sh/829skvqf7u46jqs/AAAwhkWz2S5fJpV4_i3RYIGka?dl=0)+[IR](https://www.dropbox.com/sh/igvm6hnrf6b6rmd/AAByp4H0_QDZlg4yIfqx9WhIa?dl=0) | 24 jan 2018 | Miguel Ángel, Indra
+Higueruela  |qualitative, photos [RGB](https://www.dropbox.com/sh/mh1bx8ohuri4see/AACzO2pp60-_cA07VB8UjVGsa?dl=0)+[IR](https://www.dropbox.com/sh/ywltxla9g3y23rd/AAD7malvq_aoREh_ERn2rHAsa?dl=0) | 25 jan 2018 | Belén, Indra
+
+
+```{r}
+library(reshape)
+pures <- raw[raw$tipo=="pure", ]
+mixtas <- raw[c(which(raw$sp=="mixta"), which(raw$rep %in% grep("bis", raw$rep, value=T))), ]
+adults <- raw[c(which(raw$tipo=="adult" & raw$sp!="mixta" & !raw$rep %in% grep("bis", raw$rep, value=T))), ]
+
+# count pots of each growth & damage level
+cadults <- as.matrix(table(adults$eval, adults$sp)); cadults <- cadults[apply(cadults,1,sum)!=0,]
+cpures <- as.matrix(table(pures$sp, pures$eval)); cpures <- cpures[,apply(cpures,2,sum)!=0]
+cmixtas <- as.matrix(table(mixtas$eval, mixtas$sp)); cmixtas <- cmixtas[apply(cmixtas,1,sum)!=0,]
+```
+
+## Qualitative criteria
+Antes de presentar los criterios y datos sistemáticos un par de apuntes:  
+
+- [Una foto de musgos con esporofitos!!](https://www.dropbox.com/s/ts6tvtgb1zsn0o1/IMG_20180123_094232037.jpg?dl=0).
+- [He colgado en DropBox algunas  fotos](https://www.dropbox.com/sh/96h75wl8g2oubms/AABvfX1RNUg4zHb9HqbbTMVGa?dl=0) generales y detalladas de cómo ve el investigador los musgos para evaluar los daños y el crecimiento.
+
+### Adultos
+adultos: | se evalua el crecimiento y el daño
+--|--------------------------------------------------------------------------------------------------------------------------------------
+A|se observa crecimiento evidente (SIN daños importantes)
+B|aparentemente el musgo está exactamente como se plantó (verde, pero sin signos de crecimiento)
+C|se observan daños (<50%)
+D|se observan muchos daños (>50%)
+AC|combinación de las categorías explicadas arriba (comunidad con crecimiento pero con daños visibles)
+AD|combinación de las categorías explicadas arriba (comunidad con crecimiento pero con daños MUY extendidos)
+
+### Pures
+pures: |se estima el porcentaje de zonas verdes (brotes, yemas…) como signo de establecimiento y crecimiento apical
+-----|------------------------------------------
+0 %|no se observa ninguna diferencia respecto al estado inicial (ningún ápice verde)
+<5 %|se observa algo de crecimiento apical (<5 %)
+5-25 %|crecimiento de entre 5-25 %
+25-50 %|crecimiento de entre 25-50 %
+50-75 %|crecimiento de entre 50-75 %
+75-100 %|crecimiento de entre 75-100 %
+
+## Plot **percentages**
+### by **species**
+```{r, fig.width=10}
+# set colors for levels
+colfunc.ad <- colorRampPalette(c("yellow","olivedrab3","chocolate4"))
+
+layout(mat=matrix(c(1,2,3), nrow=1), widths=c(0.5,0.2,0.3))
+par(mar=c(2,4,2,0), oma=c(0,0,0,0))
+# ADULTS
+padults <- 100*apply(cadults, 2, function(x){x/sum(x, na.rm=T)})
+padults[is.na(padults)] <- 0
+padults <- padults[1:6,2:8]
+plotadults <- barplot(padults, beside=F, main="Adults", ylab="percentage", cex.axis=1.5, col=colfunc.ad(nrow(padults)))#,      legend= rownames(padults), args.legend=list(bty="n", xpd=T, x=10, y=80))
+
+# add labels to stacked barplot
+adlabs <- cbind(melt(padults), "cum"=melt(apply(padults, 2, cumsum))$value)
+adlabs$y <- adlabs$cum-as.vector(adlabs$value/2)
+adlabs <- adlabs[adlabs$value!=0,]
+text(x=rep(plotadults, table(adlabs$Var.2)), y=adlabs$y, labels=adlabs$Var.1)
+
+# MIXTAS
+pmixtas <- 100*apply(cmixtas, 2, function(x){x/sum(x, na.rm=T)})
+pmixtas[is.na(pmixtas)] <- 0
+pmixtas <- pmixtas[1:3,"mixta", drop=F]
+plotmixtas <- barplot(pmixtas, beside=F, main="Mixtas", cex.axis=1.5,  col=colfunc.ad(nrow(pmixtas)))
+text(x=plotmixtas, y=cumsum(pmixtas)-pmixtas/2, labels=rownames(pmixtas))
+
+# PURES
+colfunc.pu <- colorRampPalette(c("blue","red","grey"))
+
+ppures <- 100*apply(cpures, 1, function(x){x/sum(x, na.rm=T)})
+ppures[is.na(ppures)] <- 0
+ppures <- ppures[1:3,c(2,3,4,5,7,8)]
+plotpure <- barplot(ppures, beside=F, main="Pures", axes=F, axisnames=F,
+                    col=colfunc.pu(nrow(ppures)))#, legend=rownames(ppures), args.legend=list(bty="n", xpd=T, x=4, y=80))
+axis(1, labels=colnames(ppures), cex.axis=1, at=plotpure, lty=0); axis(2, cex.axis=1.5)
+
+# add labels to stacked barplot
+adlabs <- cbind(melt(ppures), "cum"=melt(apply(ppures, 2, cumsum))$value)
+adlabs$y <- adlabs$cum-as.vector(adlabs$value/2)
+adlabs <- adlabs[adlabs$value!=0,]
+dicc <- data.frame("Var.1"=0:2, "meaning"=c("0 %", "<5 %", "5-25 %"))
+library(plyr)
+adlabs <- arrange(merge(dicc, adlabs), Var.2)
+text(x=rep(plotpure, table(adlabs$Var.2)), y=adlabs$y, labels=adlabs$meaning)
+```
+
+### by **categories**
+```{r, fig.width=10}
+# set colors for levels
+colfunc.ad <- colorRampPalette(c("yellow","olivedrab3","chocolate4"))
+
+layout(mat=matrix(c(1,2,3), nrow=1), widths=c(0.5,0.2,0.3))
+par(mar=c(2,4,2,0), oma=c(0,0,0,0))
+# ADULTS
+padults <- 100*apply(cadults, 1, function(x){x/sum(x, na.rm=T)})
+padults[is.na(padults)] <- 0
+padults <- padults[2:8,1:6]
+plotadults <- barplot(padults, beside=F, main="Adults", ylab="percentage", cex.axis=1.5, col=colfunc.ad(nrow(padults)))#,      legend= rownames(padults), args.legend=list(bty="n", xpd=T, x=10, y=80))
+
+# add labels to stacked barplot
+adlabs <- cbind(melt(padults), "cum"=melt(apply(padults, 2, cumsum))$value)
+adlabs$y <- adlabs$cum-as.vector(adlabs$value/2)
+adlabs <- adlabs[adlabs$value!=0,]
+text(x=rep(plotadults, table(adlabs$Var.2)), y=adlabs$y, labels=adlabs$Var.1)
+
+# MIXTAS
+pmixtas <- 100*apply(cmixtas, 1, function(x){x/sum(x, na.rm=T)})
+pmixtas[is.na(pmixtas)] <- 0
+pmixtas <- pmixtas[rownames(pmixtas)=="mixta",1:3, drop=F]
+plotmixtas <- barplot(pmixtas, beside=F, main="Mixtas", cex.axis=1.5,  col=colfunc.ad(nrow(pmixtas)))
+text(x=plotmixtas, y=pmixtas/2, labels=rownames(pmixtas))
+
+# PURES
+colfunc.pu <- colorRampPalette(c("blue","red","grey"))
+
+ppures <- 100*apply(cpures, 2, function(x){x/sum(x, na.rm=T)})
+ppures[is.na(ppures)] <- 0
+ppures <- ppures[c(2,3,4,5,7,8), 1:3]
+plotpure <- barplot(ppures, beside=F, main="Pures", axes=F, axisnames=F,
+                    col=colfunc.pu(nrow(ppures)))#, legend=rownames(ppures), args.legend=list(bty="n", xpd=T, x=4, y=80))
+axis(1, labels=c("0 %", "<5 %", "5-25 %"), cex.axis=1, at=plotpure, lty=0); axis(2, cex.axis=1.5)
+
+# add labels to stacked barplot
+adlabs <- cbind(melt(ppures), "cum"=melt(apply(ppures, 2, cumsum))$value)
+adlabs$y <- adlabs$cum-as.vector(adlabs$value/2)
+adlabs <- adlabs[adlabs$value!=0,]
+text(x=rep(plotpure, table(adlabs$Var.2)), y=adlabs$y, labels=adlabs$Var.1)
+```
+
+## Table **counts**
+Percentages are OK, but some values are very biased (a category may be represented by a single pot, but be shown as 100%).  
+Thus, here I present the count data.  
+Each table includes margin sums that help check that all the replicates were included.  
+These tables include the control pots (=white), *not present* in the percentage plots.  
+
+### Adultos monosp.
+```{r}
+library(DT)
+datatable(data.frame(rbind(addmargins(cadults))), rownames=T)
+```
+
+###  Adultos mixtas
+```{r}
+datatable(data.frame(rbind(addmargins(cmixtas))), rownames=T)
+```
+
+###  Pures
+```{r}
+dfpures <- data.frame(rbind(addmargins(cpures)))
+colnames(dfpures) <- c("0 %", "<5 %", "5-25 %", "W", "Sum")
+datatable(dfpures, rownames=T)
+```

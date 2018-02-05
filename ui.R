@@ -11,8 +11,8 @@ shinyUI(fluidPage(
         sidebarPanel(
               selectInput("moss",
                           "Select a moss species:",
-                          c("Dicranum", "Pleurochaete", "Homalothecium",
-                            "Hypnum", "Syntrichia", "Bryum"),
+                          c("Homalothecium", "Pleurochaete", "Bryum",
+                            "Hypnum", "Syntrichia", "Dicranum"),
                           selected = "Dicranum")
         ),
         
